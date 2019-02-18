@@ -4,67 +4,68 @@
 <!--monitorInterval：Log4j能够自动检测修改配置 文件和重新配置本身，设置间隔秒数-->
 <configuration status="INFO" monitorInterval="30">
     <properties>
-        <Property name="baseDir">/data/logs/</Property>
+        <Property name="basedir">/data/logs/</Property>
         <property name="log_pattern">[%d{yyyy-MM-dd HH:mm:ss.SSS}] [%t:%r] [%F:%L] - [%p] %m%n</property>
         <property name="info_file_name">info.log</property>
-        <property name="error_file_name">error.log</property>
-        <property name="warn_file_name">warn.log</property>
+        <!--<property name="error_file_name">error.log</property>-->
+        <!--<property name="warn_file_name">warn.log</property>-->
         <!-- 日志切割的最小单位 -->
-        <property name="every_file_size">100MB</property>
+        <property name="every_file_size">10MB</property>
     </properties>
     <!--先定义所有的appender-->
     <appenders>
         <!--这个输出控制台的配置-->
-        <console name="Console" target="SYSTEM_OUT">
+        <console name="Console" target="SYSTEM_OUT" follow="true">
             <!--输出日志的格式-->
             <PatternLayout pattern="${log_pattern}"/>
         </console>
         <!--文件会打印出所有信息-->
-        <File name="log" fileName="${baseDir}test.log" append="true">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %class{36} %L %M - %msg%xEx%n"/>
-        </File>
+        <!--<File name="log" fileName="${basedir}test.log" append="true">-->
+            <!--<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %class{36} %L %M - %msg%xEx%n"/>-->
+        <!--</File>-->
         <!-- 这个会打印出所有的info及以下级别的信息，每次大小超过size，则这size大小的日志会自动存入按年份-月份建立的文件夹下面并进行压缩，作为存档-->
-        <RollingFile name="RollingFileInfo" fileName="${baseDir}${info_file_name}"
-                     filePattern="${baseDir}$${date:yyyy-MM}/info-%d{yyyy-MM-dd}-%i.log">
+        <RollingFile name="RollingFileInfo" fileName="${basedir}${info_file_name}"
+                     filePattern="${basedir}$${date:yyyy-MM}/info-%d{yyyy-MM-dd}-%i.log">
             <!--控制台只输出info及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
             <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="${log_pattern}"/>
             <Policies>
-                <TimeBasedTriggeringPolicy/>
+                <!-- 每天创建一个日志文件 -->
+                <TimeBasedTriggeringPolicy interval="1"/>
                 <SizeBasedTriggeringPolicy size="${every_file_size}"/>
             </Policies>
         </RollingFile>
-        <RollingFile name="RollingFileWarn" fileName="${baseDir}${warn_file_name}"
-                     filePattern="${baseDir}$${date:yyyy-MM}/warn-%d{yyyy-MM-dd}-%i.log">
-            <ThresholdFilter level="warn" onMatch="ACCEPT" onMismatch="DENY"/>
-            <PatternLayout pattern="${log_pattern}"/>
-            <Policies>
-                <TimeBasedTriggeringPolicy/>
-                <SizeBasedTriggeringPolicy size="${every_file_size}"/>
-            </Policies>
-            <!-- DefaultRolloverStrategy属性如不设置，则默认为最多同一文件夹下7个文件，这里设置了20 -->
-            <DefaultRolloverStrategy max="20"/>
-        </RollingFile>
-        <RollingFile name="RollingFileError" fileName="${baseDir}${error_file_name}"
-                     filePattern="${baseDir}$${date:yyyy-MM}/error-%d{yyyy-MM-dd}-%i.log">
-            <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
-            <PatternLayout pattern="${log_pattern}"/>
-            <Policies>
-                <TimeBasedTriggeringPolicy/>
-                <SizeBasedTriggeringPolicy size="${every_file_size}"/>
-            </Policies>
-        </RollingFile>
+        <!--<RollingFile name="RollingFileWarn" fileName="${basedir}${warn_file_name}"-->
+                     <!--filePattern="${basedir}$${date:yyyy-MM}/warn-%d{yyyy-MM-dd}-%i.log">-->
+            <!--<ThresholdFilter level="warn" onMatch="ACCEPT" onMismatch="DENY"/>-->
+            <!--<PatternLayout pattern="${log_pattern}"/>-->
+            <!--<Policies>-->
+                <!--<TimeBasedTriggeringPolicy/>-->
+                <!--<SizeBasedTriggeringPolicy size="${every_file_size}"/>-->
+            <!--</Policies>-->
+            <!--&lt;!&ndash; DefaultRolloverStrategy属性如不设置，则默认为最多同一文件夹下7个文件，这里设置了20 &ndash;&gt;-->
+            <!--<DefaultRolloverStrategy max="20"/>-->
+        <!--</RollingFile>-->
+        <!--<RollingFile name="RollingFileError" fileName="${basedir}${error_file_name}"-->
+                     <!--filePattern="${basedir}$${date:yyyy-MM}/error-%d{yyyy-MM-dd}-%i.log">-->
+            <!--<ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>-->
+            <!--<PatternLayout pattern="${log_pattern}"/>-->
+            <!--<Policies>-->
+                <!--<TimeBasedTriggeringPolicy/>-->
+                <!--<SizeBasedTriggeringPolicy size="${every_file_size}"/>-->
+            <!--</Policies>-->
+        <!--</RollingFile>-->
     </appenders>
     <!--然后定义logger，只有定义了logger并引入的appender，appender才会生效-->
     <loggers>
         <!--过滤掉spring和mybatis的一些无用的DEBUG信息-->
         <logger name="org.springframework" level="INFO"></logger>
         <logger name="org.mybatis" level="INFO"></logger>
-        <root level="all">
+        <root level="INFO">
             <appender-ref ref="Console"/>
             <appender-ref ref="RollingFileInfo"/>
-            <appender-ref ref="RollingFileWarn"/>
-            <appender-ref ref="RollingFileError"/>
+            <!--<appender-ref ref="RollingFileWarn"/>-->
+            <!--<appender-ref ref="RollingFileError"/>-->
         </root>
     </loggers>
 </configuration>
